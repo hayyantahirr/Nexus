@@ -17,7 +17,7 @@ export const messages: Message[] = [
     receiverId: "e1",
     content:
       "Im interested in learning more about your tech stack and ML models. Are you available for a call this week?",
-    timestamp: "2023-08-15T10:30:00Z",
+    timestamp: "2025-08-15T10:30:00Z",
     isRead: true,
   },
   {
