@@ -9,7 +9,7 @@ import {
   Lock,
   Eye,
   EyeOff,
-  ShieldCheck
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../../components/ui/Button";
@@ -57,7 +57,9 @@ export const LoginPage: React.FC = () => {
         setIsLoading(false);
         setLoginStep(2);
         setResendTimer(30);
-        toast.success("Security Code sent to your device! (Demo OTP is 123456)");
+        toast.success(
+          "Security Code sent to your device! (Demo OTP is 123456)",
+        );
       }, 800);
       return;
     }
@@ -203,7 +205,9 @@ export const LoginPage: React.FC = () => {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 interactive-button"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -252,9 +256,12 @@ export const LoginPage: React.FC = () => {
                 <div className="mx-auto w-12 h-12 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center border border-primary-100 shadow-inner">
                   <ShieldCheck size={24} />
                 </div>
-                <h3 className="text-sm font-bold text-gray-900">Two-Factor Authentication</h3>
+                <h3 className="text-sm font-bold text-gray-900">
+                  Two-Factor Authentication
+                </h3>
                 <p className="text-xs text-gray-500 max-w-[280px] mx-auto leading-relaxed">
-                  We sent a 6-digit confirmation code to <strong className="text-gray-800">{email}</strong>.
+                  We sent a 6-digit confirmation code to{" "}
+                  <strong className="text-gray-800">{email}</strong>.
                 </p>
               </div>
 
@@ -278,12 +285,14 @@ export const LoginPage: React.FC = () => {
                     toast.success("Security code sent!");
                   }}
                   className={`font-semibold transition-colors ${
-                    resendTimer > 0 
-                      ? "text-gray-400 cursor-not-allowed" 
+                    resendTimer > 0
+                      ? "text-gray-400 cursor-not-allowed"
                       : "text-primary-600 hover:text-primary-500"
                   }`}
                 >
-                  {resendTimer > 0 ? `Resend Code in ${resendTimer}s` : "Resend Code"}
+                  {resendTimer > 0
+                    ? `Resend Code in ${resendTimer}s`
+                    : "Resend Code"}
                 </button>
 
                 <button

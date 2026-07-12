@@ -1,4 +1,4 @@
-export type UserRole = 'entrepreneur' | 'investor';
+export type UserRole = "entrepreneur" | "investor";
 
 export interface User {
   id: string;
@@ -12,7 +12,7 @@ export interface User {
 }
 
 export interface Entrepreneur extends User {
-  role: 'entrepreneur';
+  role: "entrepreneur";
   startupName: string;
   pitchSummary: string;
   fundingNeeded: string;
@@ -23,7 +23,7 @@ export interface Entrepreneur extends User {
 }
 
 export interface Investor extends User {
-  role: 'investor';
+  role: "investor";
   investmentInterests: string[];
   investmentStage: string[];
   portfolioCompanies: string[];
@@ -53,7 +53,7 @@ export interface CollaborationRequest {
   investorId: string;
   entrepreneurId: string;
   message: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: "pending" | "accepted" | "rejected";
   createdAt: string;
 }
 
@@ -71,9 +71,9 @@ export interface Document {
 export interface AvailabilitySlot {
   id: string;
   userId: string;
-  date: string;       // YYYY-MM-DD
-  startTime: string;  // HH:MM
-  endTime: string;    // HH:MM
+  date: string; // YYYY-MM-DD
+  startTime: string; // HH:MM
+  endTime: string; // HH:MM
   isBooked: boolean;
 }
 
@@ -83,17 +83,22 @@ export interface Meeting {
   receiverId: string;
   title: string;
   description: string;
-  date: string;       // YYYY-MM-DD
-  startTime: string;  // HH:MM
-  endTime: string;    // HH:MM
-  status: 'pending' | 'accepted' | 'declined';
+  date: string; // YYYY-MM-DD
+  startTime: string; // HH:MM
+  endTime: string; // HH:MM
+  status: "pending" | "accepted" | "declined";
   createdAt: string;
 }
 
 export interface AuthContextType {
   user: User | null;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
-  register: (name: string, email: string, password: string, role: UserRole) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    role: UserRole,
+  ) => Promise<void>;
   logout: () => void;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;

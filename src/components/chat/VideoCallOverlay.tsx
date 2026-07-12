@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Mic, MicOff, Video as VideoIcon, VideoOff, 
-  Monitor, MonitorOff, PhoneOff, User, Volume2, ShieldAlert
-} from 'lucide-react';
-import { User as UserType } from '../../types';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Mic,
+  MicOff,
+  Video as VideoIcon,
+  VideoOff,
+  Monitor,
+  MonitorOff,
+  PhoneOff,
+  User,
+  Volume2,
+  ShieldAlert,
+} from "lucide-react";
+import { User as UserType } from "../../types";
 
 interface VideoCallOverlayProps {
   currentUser: UserType;
@@ -14,19 +22,19 @@ interface VideoCallOverlayProps {
 export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
   currentUser,
   partner,
-  onClose
+  onClose,
 }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
-  
+
   // Media streams refs
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const screenVideoRef = useRef<HTMLVideoElement | null>(null);
-  
+
   const localStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
-  
+
   const [cameraPermissionError, setCameraPermissionError] = useState(false);
   const [screenPermissionError, setScreenPermissionError] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
@@ -34,15 +42,17 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
   // Call timer
   useEffect(() => {
     const timer = setInterval(() => {
-      setCallDuration(prev => prev + 1);
+      setCallDuration((prev) => prev + 1);
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
   // Format seconds to MM:SS
   const formatTime = (secs: number): string => {
-    const m = Math.floor(secs / 60).toString().padStart(2, '0');
-    const s = (secs % 60).toString().padStart(2, '0');
+    const m = Math.floor(secs / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (secs % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
   };
 
@@ -52,12 +62,12 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
       setCameraPermissionError(false);
       // Terminate any existing stream first
       if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(t => t.stop());
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: !isVideoOff,
-        audio: !isMuted
+        audio: !isMuted,
       });
 
       localStreamRef.current = stream;
@@ -75,11 +85,11 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
     try {
       setScreenPermissionError(false);
       if (screenStreamRef.current) {
-        screenStreamRef.current.getTracks().forEach(t => t.stop());
+        screenStreamRef.current.getTracks().forEach((t) => t.stop());
       }
 
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true
+        video: true,
       });
 
       screenStreamRef.current = stream;
@@ -91,7 +101,7 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
       stream.getVideoTracks()[0].onended = () => {
         setIsScreenSharing(false);
         if (screenStreamRef.current) {
-          screenStreamRef.current.getTracks().forEach(t => t.stop());
+          screenStreamRef.current.getTracks().forEach((t) => t.stop());
           screenStreamRef.current = null;
         }
       };
@@ -105,7 +115,7 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
   // Stop Screen Share Stream
   const stopScreenShare = () => {
     if (screenStreamRef.current) {
-      screenStreamRef.current.getTracks().forEach(t => t.stop());
+      screenStreamRef.current.getTracks().forEach((t) => t.stop());
       screenStreamRef.current = null;
     }
     setIsScreenSharing(false);
@@ -118,14 +128,14 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
     } else {
       // If both are disabled, we can stop the track feeds to save power/hardware indicators
       if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(t => t.stop());
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
         localStreamRef.current = null;
       }
     }
 
     return () => {
       if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(t => t.stop());
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
       }
     };
   }, [isMuted, isVideoOff]);
@@ -140,7 +150,7 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
 
     return () => {
       if (screenStreamRef.current) {
-        screenStreamRef.current.getTracks().forEach(t => t.stop());
+        screenStreamRef.current.getTracks().forEach((t) => t.stop());
       }
     };
   }, [isScreenSharing]);
@@ -149,10 +159,10 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
   useEffect(() => {
     return () => {
       if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(t => t.stop());
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
       }
       if (screenStreamRef.current) {
-        screenStreamRef.current.getTracks().forEach(t => t.stop());
+        screenStreamRef.current.getTracks().forEach((t) => t.stop());
       }
     };
   }, []);
@@ -163,8 +173,12 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
       <div className="flex justify-between items-center bg-slate-900/60 backdrop-blur-md px-6 py-3 rounded-xl border border-white/5 shadow-2xl">
         <div className="flex items-center space-x-3">
           <div className="w-2.5 h-2.5 rounded-full bg-error-500 animate-pulse"></div>
-          <span className="text-sm font-medium text-slate-300">Live WebRTC session</span>
-          <span className="text-xs px-2 py-0.5 rounded bg-white/10 text-white font-mono">{formatTime(callDuration)}</span>
+          <span className="text-sm font-medium text-slate-300">
+            Live WebRTC session
+          </span>
+          <span className="text-xs px-2 py-0.5 rounded bg-white/10 text-white font-mono">
+            {formatTime(callDuration)}
+          </span>
         </div>
         <div className="flex items-center space-x-2 text-sm text-slate-400">
           <span>Connected with</span>
@@ -177,7 +191,7 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
         {isScreenSharing && !screenPermissionError ? (
           // Screen Share Stream Main Panel
           <div className="w-full h-full relative flex items-center justify-center bg-slate-900">
-            <video 
+            <video
               ref={screenVideoRef}
               autoPlay
               playsInline
@@ -193,12 +207,16 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
           <div className="w-full h-full relative flex items-center justify-center bg-gradient-to-tr from-slate-950 via-slate-900 to-primary-950">
             {/* Animated peer visual backdrop */}
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0,transparent_100%)] pointer-events-none"></div>
-            
+
             <div className="flex flex-col items-center space-y-4 z-10 text-center">
               <div className="relative">
                 <div className="w-28 h-28 rounded-full bg-slate-800 border-2 border-white/10 flex items-center justify-center overflow-hidden shadow-2xl">
                   {partner.avatarUrl ? (
-                    <img src={partner.avatarUrl} alt={partner.name} className="w-full h-full object-cover" />
+                    <img
+                      src={partner.avatarUrl}
+                      alt={partner.name}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <User size={48} className="text-slate-400" />
                   )}
@@ -210,7 +228,9 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
               </div>
               <div>
                 <h3 className="text-xl font-bold">{partner.name}</h3>
-                <p className="text-xs text-slate-400 mt-1 capitalize">{partner.role}</p>
+                <p className="text-xs text-slate-400 mt-1 capitalize">
+                  {partner.role}
+                </p>
               </div>
             </div>
 
@@ -225,7 +245,7 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
         {/* Draggable/Floating Local Stream window (Picture-in-Picture) */}
         <div className="absolute right-4 bottom-4 w-44 sm:w-56 aspect-[4/3] rounded-xl overflow-hidden border border-white/15 shadow-2xl bg-slate-950 z-20 transition-all hover:scale-105">
           {!isVideoOff && !cameraPermissionError ? (
-            <video 
+            <video
               ref={localVideoRef}
               autoPlay
               playsInline
@@ -237,16 +257,24 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
             <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 p-3 text-center">
               <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-1">
                 {currentUser.avatarUrl ? (
-                  <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-full h-full rounded-full object-cover" />
+                  <img
+                    src={currentUser.avatarUrl}
+                    alt={currentUser.name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
                 ) : (
                   <User size={20} className="text-slate-400" />
                 )}
               </div>
-              <span className="text-[10px] text-slate-400 truncate w-full">{currentUser.name} (You)</span>
-              <span className="text-[8px] text-slate-500 uppercase mt-0.5">Camera Off</span>
+              <span className="text-[10px] text-slate-400 truncate w-full">
+                {currentUser.name} (You)
+              </span>
+              <span className="text-[8px] text-slate-500 uppercase mt-0.5">
+                Camera Off
+              </span>
             </div>
           )}
-          
+
           {/* Label overlay on PiP */}
           <div className="absolute bottom-2 left-2 bg-black/60 px-1.5 py-0.5 rounded text-[9px] font-medium text-slate-200">
             You (Local Feed)
@@ -256,11 +284,15 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
         {/* Warning messages if hardware capture fails */}
         {cameraPermissionError && (
           <div className="absolute top-4 left-4 right-4 bg-error-950/80 border border-error-500/30 backdrop-blur-md rounded-xl p-3 flex items-start space-x-3 text-error-200 text-xs shadow-lg max-w-md mx-auto z-30">
-            <ShieldAlert size={16} className="text-error-400 flex-shrink-0 mt-0.5" />
+            <ShieldAlert
+              size={16}
+              className="text-error-400 flex-shrink-0 mt-0.5"
+            />
             <div>
               <h4 className="font-semibold">Camera/Mic Capture Blocked</h4>
               <p className="mt-0.5 text-error-300">
-                Please grant camera and microphone permissions in your browser to view your live preview.
+                Please grant camera and microphone permissions in your browser
+                to view your live preview.
               </p>
             </div>
           </div>
@@ -275,11 +307,11 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
             type="button"
             onClick={() => setIsMuted(!isMuted)}
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-              isMuted 
-                ? 'bg-error-600 hover:bg-error-500 text-white shadow-error-500/20' 
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5'
+              isMuted
+                ? "bg-error-600 hover:bg-error-500 text-white shadow-error-500/20"
+                : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5"
             }`}
-            title={isMuted ? 'Unmute Microphone' : 'Mute Microphone'}
+            title={isMuted ? "Unmute Microphone" : "Mute Microphone"}
           >
             {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
@@ -289,11 +321,11 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
             type="button"
             onClick={() => setIsVideoOff(!isVideoOff)}
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-              isVideoOff 
-                ? 'bg-error-600 hover:bg-error-500 text-white shadow-error-500/20' 
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5'
+              isVideoOff
+                ? "bg-error-600 hover:bg-error-500 text-white shadow-error-500/20"
+                : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5"
             }`}
-            title={isVideoOff ? 'Turn Camera On' : 'Turn Camera Off'}
+            title={isVideoOff ? "Turn Camera On" : "Turn Camera Off"}
           >
             {isVideoOff ? <VideoOff size={20} /> : <VideoIcon size={20} />}
           </button>
@@ -303,11 +335,11 @@ export const VideoCallOverlay: React.FC<VideoCallOverlayProps> = ({
             type="button"
             onClick={() => setIsScreenSharing(!isScreenSharing)}
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-              isScreenSharing 
-                ? 'bg-primary-600 hover:bg-primary-500 text-white shadow-primary-500/20' 
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5'
+              isScreenSharing
+                ? "bg-primary-600 hover:bg-primary-500 text-white shadow-primary-500/20"
+                : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5"
             }`}
-            title={isScreenSharing ? 'Stop Screen Share' : 'Share Screen'}
+            title={isScreenSharing ? "Stop Screen Share" : "Share Screen"}
           >
             {isScreenSharing ? <MonitorOff size={20} /> : <Monitor size={20} />}
           </button>

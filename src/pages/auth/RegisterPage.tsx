@@ -37,7 +37,7 @@ export const RegisterPage: React.FC = () => {
     if (/[A-Z]/.test(pwd)) score++;
     if (/[0-9]/.test(pwd)) score++;
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
-    
+
     switch (score) {
       case 0:
       case 1:
@@ -224,27 +224,36 @@ export const RegisterPage: React.FC = () => {
                 <div className="grid grid-cols-4 gap-1 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-300 ${
-                      passwordStrength.score >= 1 ? passwordStrength.color : "bg-gray-200"
+                      passwordStrength.score >= 1
+                        ? passwordStrength.color
+                        : "bg-gray-200"
                     }`}
                   />
                   <div
                     className={`h-full rounded-full transition-all duration-300 ${
-                      passwordStrength.score >= 2 ? passwordStrength.color : "bg-gray-200"
+                      passwordStrength.score >= 2
+                        ? passwordStrength.color
+                        : "bg-gray-200"
                     }`}
                   />
                   <div
                     className={`h-full rounded-full transition-all duration-300 ${
-                      passwordStrength.score >= 3 ? passwordStrength.color : "bg-gray-200"
+                      passwordStrength.score >= 3
+                        ? passwordStrength.color
+                        : "bg-gray-200"
                     }`}
                   />
                   <div
                     className={`h-full rounded-full transition-all duration-300 ${
-                      passwordStrength.score >= 4 ? passwordStrength.color : "bg-gray-200"
+                      passwordStrength.score >= 4
+                        ? passwordStrength.color
+                        : "bg-gray-200"
                     }`}
                   />
                 </div>
                 <p className="text-[10px] text-gray-400">
-                  Tip: Use 8+ characters with uppercase letters, numbers, and special symbols.
+                  Tip: Use 8+ characters with uppercase letters, numbers, and
+                  special symbols.
                 </p>
               </div>
             )}
@@ -267,7 +276,11 @@ export const RegisterPage: React.FC = () => {
                     showConfirmPassword ? "Hide password" : "Show password"
                   }
                 >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
                 </button>
               }
             />

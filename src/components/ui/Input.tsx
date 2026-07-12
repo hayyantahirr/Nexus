@@ -31,9 +31,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       : "border-gray-300 focus:border-primary-500 focus:ring-primary-500";
 
     const inputBaseClass = `block rounded-lg shadow-sm focus:ring-2 focus:ring-opacity-50 sm:text-sm py-2.5 px-3.5 border transition-all ${errorClass}`;
-    const startPaddingClass = startAdornment
-      ? "placeholder-shown:pl-10"
-      : "";
+    const startPaddingClass = startAdornment ? "placeholder-shown:pl-10" : "";
     const endPaddingClass = endAdornment ? "pr-10" : "";
 
     return (
