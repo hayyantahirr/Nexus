@@ -7,16 +7,14 @@ import {
   Search,
   PlusCircle,
   Clock,
-  Calendar,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { Card, CardBody, CardHeader } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
-import { Badge } from "../../components/ui/Badge";
 import { Avatar } from "../../components/ui/Avatar";
 import { EntrepreneurCard } from "../../components/entrepreneur/EntrepreneurCard";
 import { useAuth } from "../../context/AuthContext";
-import { Entrepreneur, Meeting } from "../../types";
+import { Meeting } from "../../types";
 import { entrepreneurs, findUserById } from "../../data/users";
 import { getRequestsFromInvestor } from "../../data/collaborationRequests";
 import { getMeetingsForUser } from "../../data/meetings";
@@ -26,6 +24,7 @@ export const InvestorDashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -98,8 +97,8 @@ export const InvestorDashboard: React.FC = () => {
       </div>
 
       {/* Filters and search */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="w-full md:w-2/3">
+      <div className="flex flex-col sm:flex-row gap-4 items-stretch relative">
+        <div className="flex-1">
           <Input
             placeholder="Search startups, industries, or keywords..."
             value={searchQuery}
@@ -109,28 +108,83 @@ export const InvestorDashboard: React.FC = () => {
           />
         </div>
 
-        <div className="w-full md:w-1/3">
-          <div className="flex items-center space-x-2">
-            <Filter size={18} className="text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">
-              Filter by:
+        <div className="relative flex items-center">
+          <button
+            type="button"
+            onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+            className="inline-flex items-center justify-between px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 h-[42px] min-w-[160px] transition-colors w-full sm:w-auto"
+          >
+            <span className="flex items-center">
+              <Filter size={16} className="mr-2 text-gray-500" />
+              {selectedIndustries.length === 0
+                ? "All Industries"
+                : `${selectedIndustries.length} Selected`}
             </span>
+            <svg
+              className="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
 
-            <div className="flex flex-wrap gap-2">
-              {industries.map((industry) => (
-                <Badge
-                  key={industry}
-                  variant={
-                    selectedIndustries.includes(industry) ? "primary" : "gray"
-                  }
-                  className="cursor-pointer"
-                  onClick={() => toggleIndustry(industry)}
-                >
-                  {industry}
-                </Badge>
-              ))}
-            </div>
-          </div>
+          {isFilterDropdownOpen && (
+            <>
+              {/* Overlay background to close the dropdown when clicking outside */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsFilterDropdownOpen(false)}
+              ></div>
+
+              {/* Dropdown Card */}
+              <div className="absolute right-0 top-full mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 p-4 border border-gray-100 animate-fade-in">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Filter by Industry
+                  </h3>
+                  {selectedIndustries.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedIndustries([]);
+                        setIsFilterDropdownOpen(false);
+                      }}
+                      className="text-xs font-semibold text-primary-600 hover:text-primary-500"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {industries.map((industry) => {
+                    const isChecked = selectedIndustries.includes(industry);
+                    return (
+                      <label
+                        key={industry}
+                        className="flex items-center space-x-2.5 p-1.5 rounded-md hover:bg-gray-50 cursor-pointer text-sm text-gray-700 transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleIndustry(industry)}
+                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                        />
+                        <span className="font-medium">{industry}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
