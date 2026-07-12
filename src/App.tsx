@@ -31,6 +31,34 @@ import { WalletPage } from './pages/wallet/WalletPage';
 
 // Chat Pages
 import { ChatPage } from './pages/chat/ChatPage';
+import { useAuth } from './context/AuthContext';
+
+// Role Guard Component
+interface RoleRouteProps {
+  allowedRole: 'investor' | 'entrepreneur';
+  children: React.ReactNode;
+}
+
+const RoleRoute: React.FC<RoleRouteProps> = ({ allowedRole, children }) => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (user.role !== allowedRole) {
+    return <Navigate to={user.role === 'entrepreneur' ? '/dashboard/entrepreneur' : '/dashboard/investor'} replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Index Dashboard Auto-Redirect
+const DashboardRedirect: React.FC = () => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return <Navigate to={user.role === 'entrepreneur' ? '/dashboard/entrepreneur' : '/dashboard/investor'} replace />;
+};
 
 function App() {
   return (
@@ -43,8 +71,23 @@ function App() {
           
           {/* Dashboard Routes */}
           <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route path="entrepreneur" element={<EntrepreneurDashboard />} />
-            <Route path="investor" element={<InvestorDashboard />} />
+            <Route index element={<DashboardRedirect />} />
+            <Route 
+              path="entrepreneur" 
+              element={
+                <RoleRoute allowedRole="entrepreneur">
+                  <EntrepreneurDashboard />
+                </RoleRoute>
+              } 
+            />
+            <Route 
+              path="investor" 
+              element={
+                <RoleRoute allowedRole="investor">
+                  <InvestorDashboard />
+                </RoleRoute>
+              } 
+            />
           </Route>
           
           {/* Profile Routes */}

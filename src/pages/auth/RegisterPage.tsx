@@ -29,6 +29,32 @@ export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  // Password Strength Meter Helper
+  const getPasswordStrength = (pwd: string) => {
+    if (!pwd) return { score: 0, label: "", color: "bg-gray-200" };
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    
+    switch (score) {
+      case 0:
+      case 1:
+        return { score, label: "Weak", color: "bg-error-500" };
+      case 2:
+        return { score, label: "Fair", color: "bg-warning-500" };
+      case 3:
+        return { score, label: "Good", color: "bg-primary-500" };
+      case 4:
+        return { score, label: "Strong", color: "bg-success-500" };
+      default:
+        return { score: 0, label: "", color: "bg-gray-200" };
+    }
+  };
+
+  const passwordStrength = getPasswordStrength(password);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -176,6 +202,52 @@ export const RegisterPage: React.FC = () => {
                 </button>
               }
             />
+
+            {password && (
+              <div className="mt-2 space-y-1.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-500">Password Strength:</span>
+                  <span
+                    className={`font-bold ${
+                      passwordStrength.score <= 1
+                        ? "text-error-600"
+                        : passwordStrength.score === 2
+                          ? "text-warning-600"
+                          : passwordStrength.score === 3
+                            ? "text-primary-600"
+                            : "text-success-600"
+                    }`}
+                  >
+                    {passwordStrength.label}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-1 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      passwordStrength.score >= 1 ? passwordStrength.color : "bg-gray-200"
+                    }`}
+                  />
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      passwordStrength.score >= 2 ? passwordStrength.color : "bg-gray-200"
+                    }`}
+                  />
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      passwordStrength.score >= 3 ? passwordStrength.color : "bg-gray-200"
+                    }`}
+                  />
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      passwordStrength.score >= 4 ? passwordStrength.color : "bg-gray-200"
+                    }`}
+                  />
+                </div>
+                <p className="text-[10px] text-gray-400">
+                  Tip: Use 8+ characters with uppercase letters, numbers, and special symbols.
+                </p>
+              </div>
+            )}
 
             <Input
               label="Confirm password"
