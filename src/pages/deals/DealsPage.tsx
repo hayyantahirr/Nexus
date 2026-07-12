@@ -14,6 +14,7 @@ import {
   FileText,
   X,
   Trash2,
+  CreditCard as CardIcon
 } from "lucide-react";
 import { Card, CardHeader, CardBody } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
@@ -21,6 +22,7 @@ import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Avatar } from "../../components/ui/Avatar";
 import { useAuth } from "../../context/AuthContext";
+import { getWalletBalance, transferFunds } from "../../data/wallet";
 import toast from "react-hot-toast";
 
 // Types
@@ -184,6 +186,39 @@ export const DealsPage: React.FC = () => {
 
   // Mock File Upload Ref
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Funding Flow States
+  const [isFundingCheckoutOpen, setIsFundingCheckoutOpen] = useState(false);
+  const [investorBalance, setInvestorBalance] = useState(0);
+  const [checkoutCardNumber, setCheckoutCardNumber] = useState('4242 4242 4242 4242');
+  const [checkoutCardExpiry, setCheckoutCardExpiry] = useState('12/28');
+  const [checkoutCardCvc, setCheckoutCardCvc] = useState('342');
+  const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'card'>('wallet');
+
+  useEffect(() => {
+    if (user) {
+      setInvestorBalance(getWalletBalance(user.id));
+    }
+  }, [user, isFundingCheckoutOpen]);
+
+  // Helper to get deal owner
+  const getStartupOwnerId = (startupName: string): string => {
+    if (startupName === 'TechWave AI') return 'e1';
+    if (startupName === 'GreenLife Solutions') return 'e2';
+    return 'e1'; // fallback
+  };
+
+  // Helper to parse amount like "$1.5M" or "$800K" into numbers
+  const parseDealAmount = (amountStr: string): number => {
+    const cleanStr = amountStr.replace('$', '');
+    if (cleanStr.endsWith('M')) {
+      return parseFloat(cleanStr.replace('M', '')) * 1000000;
+    }
+    if (cleanStr.endsWith('K')) {
+      return parseFloat(cleanStr.replace('K', '')) * 1000;
+    }
+    return parseFloat(cleanStr) || 0;
+  };
 
   const statuses = [
     "Due Diligence",
@@ -482,10 +517,22 @@ export const DealsPage: React.FC = () => {
               accept=".pdf,.docx,.doc,.txt"
               className="hidden"
             />
+            
+            {user?.role === 'investor' && dealDetails.status !== 'Closed' && (
+              <Button
+                variant="success"
+                leftIcon={<DollarSign size={16} />}
+                onClick={() => setIsFundingCheckoutOpen(true)}
+                className="interactive-button bg-success-600 hover:bg-success-700 text-white font-semibold shadow-sm border-none"
+              >
+                Fund Startup
+              </Button>
+            )}
+
             <Button
               leftIcon={<Upload size={16} />}
               onClick={handleUploadClick}
-              className="interactive-button"
+              className="interactive-button text-slate-700 bg-slate-100 border border-slate-200 hover:bg-slate-200 font-semibold shadow-sm"
             >
               Upload Doc
             </Button>
@@ -746,6 +793,192 @@ export const DealsPage: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Stripe Checkout Modal */}
+        {isFundingCheckoutOpen && (
+          <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-md overflow-hidden animate-scale-in flex flex-col">
+              {/* Security Header */}
+              <div className="bg-slate-900 px-6 py-4 text-white flex justify-between items-center border-b border-slate-800">
+                <div className="flex items-center space-x-2.5">
+                  <div className="p-1 bg-primary-600 rounded">
+                    <Lock size={14} className="text-white" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold tracking-wider text-slate-100 uppercase block">Nexus Payments</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">Secure Stripe Sandbox API</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsFundingCheckoutOpen(false)}
+                  className="p-1.5 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Invoice Summary */}
+              <div className="p-6 space-y-5">
+                <div className="text-center pb-4 border-b border-gray-100">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Investment Amount</p>
+                  <h2 className="text-3xl font-extrabold text-slate-900 mt-1 font-mono">{dealDetails.amount}</h2>
+                  <p className="text-[11px] text-slate-500 mt-1.5 flex items-center justify-center space-x-1.5">
+                    <span>to</span>
+                    <strong className="text-slate-800 font-semibold">{dealDetails.startup.name}</strong>
+                    <span>for</span>
+                    <strong className="text-slate-800 font-semibold">{dealDetails.equity} Equity</strong>
+                  </p>
+                </div>
+
+                {/* Modern Pill Tab Selector */}
+                <div className="space-y-2">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Select Funding Source
+                  </label>
+                  <div className="bg-slate-100 p-1 rounded-xl flex space-x-1 border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('wallet')}
+                      className={`flex-1 py-2 text-xs font-bold rounded-lg text-center transition-all ${
+                        paymentMethod === 'wallet'
+                          ? 'bg-white text-primary-600 shadow-sm border border-slate-200/50'
+                          : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                    >
+                      Wallet Balance
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('card')}
+                      className={`flex-1 py-2 text-xs font-bold rounded-lg text-center transition-all ${
+                        paymentMethod === 'card'
+                          ? 'bg-white text-primary-600 shadow-sm border border-slate-200/50'
+                          : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                    >
+                      Credit Card
+                    </button>
+                  </div>
+                </div>
+
+                {/* Input Fields */}
+                {paymentMethod === 'wallet' ? (
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2.5">
+                    <div className="flex justify-between text-xs text-slate-600">
+                      <span>Investor Balance:</span>
+                      <span className="font-bold text-slate-900 font-mono">${investorBalance.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-600 border-b border-dashed border-slate-200 pb-2">
+                      <span>Investment Value:</span>
+                      <span className="font-bold text-slate-900 font-mono">${parseDealAmount(dealDetails.amount).toLocaleString()}</span>
+                    </div>
+                    {investorBalance >= parseDealAmount(dealDetails.amount) ? (
+                      <div className="flex items-center space-x-2 text-[10px] text-success-600 font-medium pt-1">
+                        <CheckCircle2 size={12} />
+                        <span>Sufficient balance to process instantly.</span>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-[10px] text-error-600 font-semibold leading-relaxed">
+                        ⚠️ Insufficient balance in your Nexus wallet. Please pay via Credit Card or add deposits first.
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4 p-4 border border-slate-200 rounded-xl bg-slate-50/50">
+                    <Input
+                      label="Card Number"
+                      value={checkoutCardNumber}
+                      onChange={e => setCheckoutCardNumber(e.target.value)}
+                      placeholder="4242 4242 4242 4242"
+                      required
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <Input
+                        label="Expiry"
+                        value={checkoutCardExpiry}
+                        onChange={e => setCheckoutCardExpiry(e.target.value)}
+                        placeholder="MM/YY"
+                        required
+                      />
+                      <Input
+                        label="CVC"
+                        value={checkoutCardCvc}
+                        onChange={e => setCheckoutCardCvc(e.target.value)}
+                        placeholder="342"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Secure Checkout Action Footer */}
+              <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex flex-col space-y-2">
+                <Button
+                  variant="success"
+                  fullWidth
+                  leftIcon={<Lock size={14} />}
+                  onClick={() => {
+                    const dealAmount = parseDealAmount(dealDetails.amount);
+                    const startupOwnerId = getStartupOwnerId(dealDetails.startup.name);
+                    const startupOwner = findUserById(startupOwnerId);
+
+                    if (paymentMethod === 'wallet' && investorBalance < dealAmount) {
+                      toast.error('Insufficient wallet balance! Choose Card Payment.');
+                      return;
+                    }
+
+                    if (paymentMethod === 'card') {
+                      // Simulated card charging
+                      const balances = JSON.parse(localStorage.getItem('business_nexus_balances') || '{}');
+                      balances[user.id] = (balances[user.id] || 0) + dealAmount;
+                      localStorage.setItem('business_nexus_balances', JSON.stringify(balances));
+                    }
+
+                    const success = transferFunds(
+                      user.id,
+                      user.name,
+                      startupOwnerId,
+                      startupOwner?.name || dealDetails.startup.name,
+                      dealAmount,
+                      `Equity Deal Investment in ${dealDetails.startup.name} (${dealDetails.stage})`,
+                      'funding'
+                    );
+
+                    if (success) {
+                      setDealsList(prev =>
+                        prev.map(d => {
+                          if (d.id === dealDetails.id) {
+                            return {
+                              ...d,
+                              status: 'Closed',
+                              lastActivity: new Date().toISOString().split('T')[0]
+                            };
+                          }
+                          return d;
+                        })
+                      );
+                      toast.success(`Investment of ${dealDetails.amount} processed successfully!`);
+                      setIsFundingCheckoutOpen(false);
+                    } else {
+                      toast.error('Transaction failed.');
+                    }
+                  }}
+                  className="interactive-button py-3 text-sm font-bold bg-success-600 hover:bg-success-700 text-white shadow"
+                >
+                  Confirm Investment of {dealDetails.amount}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setIsFundingCheckoutOpen(false)}
+                  className="text-xs text-slate-500 hover:text-slate-800 text-center py-1 transition-all"
+                >
+                  Cancel and return to document chamber
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

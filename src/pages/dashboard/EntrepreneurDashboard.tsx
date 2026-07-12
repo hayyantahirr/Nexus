@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Bell, Calendar, TrendingUp, AlertCircle, PlusCircle, Clock } from 'lucide-react';
+import { Users, Bell, Calendar,  AlertCircle, PlusCircle, Clock, Wallet } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -12,18 +12,23 @@ import { CollaborationRequest, Meeting } from '../../types';
 import { getRequestsForEntrepreneur } from '../../data/collaborationRequests';
 import { getMeetingsForUser } from '../../data/meetings';
 import { investors, findUserById } from '../../data/users';
+import { getWalletBalance } from '../../data/wallet';
 
 export const EntrepreneurDashboard: React.FC = () => {
   const { user } = useAuth();
   const [collaborationRequests, setCollaborationRequests] = useState<CollaborationRequest[]>([]);
   const [recommendedInvestors, setRecommendedInvestors] = useState(investors.slice(0, 3));
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [walletBalance, setWalletBalance] = useState(0);
   
   useEffect(() => {
     if (user) {
       // Load collaboration requests
       const requests = getRequestsForEntrepreneur(user.id);
       setCollaborationRequests(requests);
+      
+      // Load balance
+      setWalletBalance(getWalletBalance(user.id));
 
       // Load meetings
       const userMeetings = getMeetingsForUser(user.id);
@@ -108,19 +113,23 @@ export const EntrepreneurDashboard: React.FC = () => {
           </CardBody>
         </Card>
         
-        <Card className="bg-success-50 border border-success-100">
-          <CardBody>
-            <div className="flex items-center">
-              <div className="p-3 bg-green-100 rounded-full mr-4">
-                <TrendingUp size={20} className="text-success-700" />
+        <Link to="/wallet">
+          <Card className="bg-success-50 border border-success-100 hover:bg-success-100/50 cursor-pointer transition-all">
+            <CardBody>
+              <div className="flex items-center">
+                <div className="p-3 bg-green-100 rounded-full mr-4">
+                  <Wallet size={20} className="text-success-700" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-success-700">Wallet Balance</p>
+                  <h3 className="text-xl font-semibold text-success-900 font-mono">
+                    ${walletBalance.toLocaleString()}
+                  </h3>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-success-700">Profile Views</p>
-                <h3 className="text-xl font-semibold text-success-900">24</h3>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
+            </CardBody>
+          </Card>
+        </Link>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

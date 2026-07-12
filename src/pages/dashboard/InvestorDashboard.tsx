@@ -7,6 +7,7 @@ import {
   Search,
   PlusCircle,
   Clock,
+  Wallet,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { Card, CardBody, CardHeader } from "../../components/ui/Card";
@@ -18,6 +19,7 @@ import { Meeting } from "../../types";
 import { entrepreneurs, findUserById } from "../../data/users";
 import { getRequestsFromInvestor } from "../../data/collaborationRequests";
 import { getMeetingsForUser } from "../../data/meetings";
+import { getWalletBalance } from "../../data/wallet";
 
 export const InvestorDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -25,11 +27,13 @@ export const InvestorDashboard: React.FC = () => {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const [walletBalance, setWalletBalance] = useState(0);
 
   useEffect(() => {
     if (user) {
       const userMeetings = getMeetingsForUser(user.id);
       setMeetings(userMeetings);
+      setWalletBalance(getWalletBalance(user.id));
     }
   }, [user]);
 
@@ -189,7 +193,7 @@ export const InvestorDashboard: React.FC = () => {
       </div>
 
       {/* Stats summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-primary-50 border border-primary-100">
           <CardBody>
             <div className="flex items-center">
@@ -246,6 +250,26 @@ export const InvestorDashboard: React.FC = () => {
             </div>
           </CardBody>
         </Card>
+
+        <Link to="/wallet">
+          <Card className="bg-success-50 border border-success-100 hover:bg-success-100/50 cursor-pointer transition-all">
+            <CardBody>
+              <div className="flex items-center">
+                <div className="p-3 bg-green-100 rounded-full mr-4">
+                  <Wallet size={20} className="text-success-700" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-success-700">
+                    Wallet Balance
+                  </p>
+                  <h3 className="text-xl font-semibold text-success-900 font-mono">
+                    ${walletBalance.toLocaleString()}
+                  </h3>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+        </Link>
       </div>
 
       {/* Two-column main contents grid */}
