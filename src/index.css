@@ -1,3 +1,87 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Design Tokens */
+    --font-sans: 'Inter var', 'Inter', system-ui, sans-serif;
+    
+    /* Animation easing */
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Core Typography Defaults */
+  h1, .h1 {
+    @apply text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl md:text-4xl;
+    line-height: 1.2;
+  }
+
+  h2, .h2 {
+    @apply text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl;
+    line-height: 1.25;
+  }
+
+  h3, .h3 {
+    @apply text-lg font-semibold text-gray-900 sm:text-xl;
+    line-height: 1.3;
+  }
+
+  h4, .h4 {
+    @apply text-base font-medium text-gray-900 sm:text-lg;
+  }
+
+  p, .body-base {
+    @apply text-sm text-gray-600 sm:text-base leading-relaxed;
+  }
+
+  .body-small {
+    @apply text-xs sm:text-sm text-gray-500 leading-normal;
+  }
+
+  .body-large {
+    @apply text-base sm:text-lg text-gray-700 leading-relaxed;
+  }
+}
+
+@layer components {
+  /* Unified Viewport Wrapper */
+  .nexus-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full;
+  }
+
+  /* Standard Grid Configurations */
+  .nexus-grid-1-2 {
+    @apply grid grid-cols-1 lg:grid-cols-3 gap-6;
+  }
+
+  .nexus-grid-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+
+  .nexus-grid-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .nexus-grid-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+  }
+
+  /* Micro-Interactions & Hover Transitions */
+  .interactive-card {
+    @apply transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1 hover:border-gray-300;
+  }
+
+  .interactive-button {
+    @apply transition-all duration-200 ease-in-out active:scale-95;
+  }
+
+  .interactive-link {
+    @apply transition-colors duration-200 hover:text-primary-600;
+  }
+}
