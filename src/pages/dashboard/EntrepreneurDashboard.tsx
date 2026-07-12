@@ -1,26 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Bell, Calendar, TrendingUp, AlertCircle, PlusCircle } from 'lucide-react';
+import { Users, Bell, Calendar, TrendingUp, AlertCircle, PlusCircle, Clock } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { Avatar } from '../../components/ui/Avatar';
 import { CollaborationRequestCard } from '../../components/collaboration/CollaborationRequestCard';
 import { InvestorCard } from '../../components/investor/InvestorCard';
 import { useAuth } from '../../context/AuthContext';
-import { CollaborationRequest } from '../../types';
+import { CollaborationRequest, Meeting } from '../../types';
 import { getRequestsForEntrepreneur } from '../../data/collaborationRequests';
-import { investors } from '../../data/users';
+import { getMeetingsForUser } from '../../data/meetings';
+import { investors, findUserById } from '../../data/users';
 
 export const EntrepreneurDashboard: React.FC = () => {
   const { user } = useAuth();
   const [collaborationRequests, setCollaborationRequests] = useState<CollaborationRequest[]>([]);
   const [recommendedInvestors, setRecommendedInvestors] = useState(investors.slice(0, 3));
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
   
   useEffect(() => {
     if (user) {
       // Load collaboration requests
       const requests = getRequestsForEntrepreneur(user.id);
       setCollaborationRequests(requests);
+
+      // Load meetings
+      const userMeetings = getMeetingsForUser(user.id);
+      setMeetings(userMeetings);
     }
   }, [user]);
   
@@ -35,6 +42,7 @@ export const EntrepreneurDashboard: React.FC = () => {
   if (!user) return null;
   
   const pendingRequests = collaborationRequests.filter(req => req.status === 'pending');
+  const confirmedMeetings = meetings.filter(m => m.status === 'accepted');
   
   return (
     <div className="space-y-6 animate-fade-in">
@@ -47,6 +55,7 @@ export const EntrepreneurDashboard: React.FC = () => {
         <Link to="/investors">
           <Button
             leftIcon={<PlusCircle size={18} />}
+            className="interactive-button"
           >
             Find Investors
           </Button>
@@ -93,7 +102,7 @@ export const EntrepreneurDashboard: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-accent-700">Upcoming Meetings</p>
-                <h3 className="text-xl font-semibold text-accent-900">2</h3>
+                <h3 className="text-xl font-semibold text-accent-900">{confirmedMeetings.length}</h3>
               </div>
             </div>
           </CardBody>
@@ -128,9 +137,9 @@ export const EntrepreneurDashboard: React.FC = () => {
                 <div className="space-y-4">
                   {collaborationRequests.map(request => (
                     <CollaborationRequestCard
-                      key={request.id}
-                      request={request}
-                      onStatusUpdate={handleRequestStatusUpdate}
+                       key={request.id}
+                       request={request}
+                       onStatusUpdate={handleRequestStatusUpdate}
                     />
                   ))}
                 </div>
@@ -147,12 +156,12 @@ export const EntrepreneurDashboard: React.FC = () => {
           </Card>
         </div>
         
-        {/* Recommended investors */}
-        <div className="space-y-4">
+        {/* Recommended investors & Upcoming Meetings Sidebar */}
+        <div className="space-y-6">
           <Card>
             <CardHeader className="flex justify-between items-center">
               <h2 className="text-lg font-medium text-gray-900">Recommended Investors</h2>
-              <Link to="/investors" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+              <Link to="/investors" className="text-sm font-medium text-primary-600 hover:text-primary-500 interactive-link">
                 View all
               </Link>
             </CardHeader>
@@ -165,6 +174,43 @@ export const EntrepreneurDashboard: React.FC = () => {
                   showActions={false}
                 />
               ))}
+            </CardBody>
+          </Card>
+
+          {/* Upcoming Meetings widget */}
+          <Card>
+            <CardHeader className="flex justify-between items-center">
+              <h2 className="text-lg font-medium text-gray-900">Upcoming Meetings</h2>
+              <Link to="/calendar" className="text-sm font-medium text-primary-600 hover:text-primary-500 interactive-link">
+                View Calendar
+              </Link>
+            </CardHeader>
+            <CardBody className="space-y-3">
+              {confirmedMeetings.length === 0 ? (
+                <p className="text-sm text-gray-400 italic text-center py-4">No upcoming meetings.</p>
+              ) : (
+                confirmedMeetings.map(meet => {
+                  const partnerId = meet.senderId === user.id ? meet.receiverId : meet.senderId;
+                  const partner = findUserById(partnerId);
+                  return (
+                    <div key={meet.id} className="p-3 border border-gray-100 bg-white rounded-lg shadow-sm text-sm">
+                      <div className="flex justify-between items-start font-medium">
+                        <span className="truncate pr-1 text-gray-900">{meet.title}</span>
+                        <span className="text-[10px] whitespace-nowrap bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded flex items-center">
+                          <Clock size={10} className="mr-1" />
+                          {meet.startTime}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1.5 mt-2 text-xs text-gray-500">
+                        <Avatar src={partner?.avatarUrl || ''} alt={partner?.name || ''} size="xs" />
+                        <span>With {partner?.name}</span>
+                        <span className="text-gray-300">|</span>
+                        <span>{meet.date}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </CardBody>
           </Card>
         </div>

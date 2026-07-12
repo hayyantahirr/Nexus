@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MessageCircle, Users, Calendar, Building2, MapPin, UserCircle, FileText, DollarSign, Send } from 'lucide-react';
+import { MessageCircle, Users, Calendar, Building2, MapPin, UserCircle, FileText, DollarSign, Send} from 'lucide-react';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { Input } from '../../components/ui/Input';
 import { useAuth } from '../../context/AuthContext';
 import { findUserById } from '../../data/users';
 import { createCollaborationRequest, getRequestsFromInvestor } from '../../data/collaborationRequests';
-import { Entrepreneur } from '../../types';
+import { getAvailabilityForUser, sendMeetingRequest } from '../../data/meetings';
+import { Entrepreneur, AvailabilitySlot } from '../../types';
+import toast from 'react-hot-toast';
 
 export const EntrepreneurProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +34,43 @@ export const EntrepreneurProfile: React.FC = () => {
   
   const isCurrentUser = currentUser?.id === entrepreneur.id;
   const isInvestor = currentUser?.role === 'investor';
+  
+  // States for Meeting Scheduler
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
+  const [selectedSlotId, setSelectedSlotId] = useState('');
+  const [meetingTitle, setMeetingTitle] = useState('');
+  const [meetingDesc, setMeetingDesc] = useState('');
+
+  useEffect(() => {
+    if (entrepreneur) {
+      setSlots(getAvailabilityForUser(entrepreneur.id));
+    }
+  }, [entrepreneur.id]);
+
+  const handleBookMeeting = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedSlotId || !currentUser) return;
+    
+    const slot = slots.find(s => s.id === selectedSlotId);
+    if (!slot) return;
+
+    sendMeetingRequest(
+      currentUser.id,
+      entrepreneur.id,
+      slot.date,
+      slot.startTime,
+      slot.endTime,
+      meetingTitle,
+      meetingDesc,
+      slot.id
+    );
+
+    toast.success('Meeting request sent!');
+    setMeetingTitle('');
+    setMeetingDesc('');
+    setSelectedSlotId('');
+    setSlots(getAvailabilityForUser(entrepreneur.id));
+  };
   
   // Check if the current investor has already sent a request to this entrepreneur
   const hasRequestedCollaboration = isInvestor && id 
@@ -348,6 +388,69 @@ export const EntrepreneurProfile: React.FC = () => {
               )}
             </CardBody>
           </Card>
+
+          {/* Scheduling card */}
+          {!isCurrentUser && (
+            <Card>
+              <CardHeader>
+                <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                  <Calendar size={18} className="mr-2 text-primary-600" />
+                  Schedule a Meeting
+                </h2>
+              </CardHeader>
+              <CardBody>
+                {slots.filter(s => !s.isBooked).length === 0 ? (
+                  <p className="text-sm text-gray-500 italic">No availability slots posted currently.</p>
+                ) : (
+                  <form onSubmit={handleBookMeeting} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Select Timeslot
+                      </label>
+                      <select
+                        value={selectedSlotId}
+                        onChange={e => setSelectedSlotId(e.target.value)}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                        required
+                      >
+                        <option value="">-- Choose Slot --</option>
+                        {slots.filter(s => !s.isBooked).map(s => (
+                          <option key={s.id} value={s.id}>
+                            {s.date} ({s.startTime} - {s.endTime})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <Input
+                      label="Meeting Title"
+                      value={meetingTitle}
+                      onChange={e => setMeetingTitle(e.target.value)}
+                      placeholder="e.g. Intro Meeting"
+                      required
+                    />
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Agenda / Description
+                      </label>
+                      <textarea
+                        value={meetingDesc}
+                        onChange={e => setMeetingDesc(e.target.value)}
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                        rows={3}
+                        placeholder="Discuss product roadmap and tech stack..."
+                      />
+                    </div>
+
+                    <Button type="submit" size="sm" fullWidth className="interactive-button">
+                      Request Meeting
+                    </Button>
+                  </form>
+                )}
+              </CardBody>
+            </Card>
+          )}
         </div>
       </div>
     </div>
