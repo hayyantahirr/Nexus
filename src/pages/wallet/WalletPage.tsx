@@ -200,7 +200,7 @@ export const WalletPage: React.FC = () => {
               <p className="text-[9px] uppercase tracking-wider text-slate-400">
                 Available Balance
               </p>
-              <h2 className="text-2xl font-extrabold font-mono tracking-tight mt-0.5">
+              <h2 className="text-2xl font-extrabold font-mono tracking-tight mt-0.5 text-white">
                 {formatCurrency(balance)}
               </h2>
             </div>
