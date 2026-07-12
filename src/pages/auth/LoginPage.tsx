@@ -6,6 +6,9 @@ import {
   Building2,
   LogIn,
   AlertCircle,
+  Lock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../../components/ui/Button";
@@ -18,6 +21,7 @@ export const LoginPage: React.FC = () => {
   const [role, setRole] = useState<UserRole>("entrepreneur");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -54,10 +58,10 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="w-12 h-12 bg-primary-600 rounded-md flex items-center justify-center">
+          <div className="w-12 h-12 bg-primary-600 rounded-md flex items-center justify-center interactive-button">
             <svg
               width="32"
               height="32"
@@ -83,7 +87,7 @@ export const LoginPage: React.FC = () => {
             </svg>
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
           Sign in to Business Nexus
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
@@ -91,8 +95,8 @@ export const LoginPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md w-full">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 rounded-lg">
           {error && (
             <div className="mb-4 bg-error-50 border border-error-500 text-error-700 px-4 py-3 rounded-md flex items-start">
               <AlertCircle size={18} className="mr-2 mt-0.5" />
@@ -105,12 +109,12 @@ export const LoginPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 I am a
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className={`py-3 px-4 border rounded-md flex items-center justify-center transition-colors ${
+                  className={`py-3 px-4 border rounded-md flex items-center justify-center transition-colors interactive-button ${
                     role === "entrepreneur"
-                      ? "border-primary-500 bg-primary-50 text-primary-700"
+                      ? "border-primary-500 bg-primary-50 text-primary-700 font-medium"
                       : "border-gray-300 text-gray-700 hover:bg-gray-50"
                   }`}
                   onClick={() => setRole("entrepreneur")}
@@ -121,9 +125,9 @@ export const LoginPage: React.FC = () => {
 
                 <button
                   type="button"
-                  className={`py-3 px-4 border rounded-md flex items-center justify-center transition-colors ${
+                  className={`py-3 px-4 border rounded-md flex items-center justify-center transition-colors interactive-button ${
                     role === "investor"
-                      ? "border-primary-500 bg-primary-50 text-primary-700"
+                      ? "border-primary-500 bg-primary-50 text-primary-700 font-medium"
                       : "border-gray-300 text-gray-700 hover:bg-gray-50"
                   }`}
                   onClick={() => setRole("investor")}
@@ -146,14 +150,26 @@ export const LoginPage: React.FC = () => {
 
             <Input
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               fullWidth
+              startAdornment={<Lock size={18} />}
+              endAdornmentInteractive={true}
+              endAdornment={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 interactive-button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              }
             />
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex items-center">
                 <input
                   id="remember-me"
@@ -172,7 +188,7 @@ export const LoginPage: React.FC = () => {
               <div className="text-sm">
                 <a
                   href="#"
-                  className="font-medium text-primary-600 hover:text-primary-500"
+                  className="font-medium text-primary-600 hover:text-primary-500 interactive-link"
                 >
                   Forgot your password?
                 </a>
@@ -184,6 +200,7 @@ export const LoginPage: React.FC = () => {
               fullWidth
               isLoading={isLoading}
               leftIcon={<LogIn size={18} />}
+              className="interactive-button"
             >
               Sign in
             </Button>
@@ -201,11 +218,13 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button
                 variant="outline"
                 onClick={() => fillDemoCredentials("entrepreneur")}
                 leftIcon={<Building2 size={16} />}
+                fullWidth
+                className="interactive-button"
               >
                 Entrepreneur Demo
               </Button>
@@ -214,6 +233,8 @@ export const LoginPage: React.FC = () => {
                 variant="outline"
                 onClick={() => fillDemoCredentials("investor")}
                 leftIcon={<CircleDollarSign size={16} />}
+                fullWidth
+                className="interactive-button"
               >
                 Investor Demo
               </Button>
@@ -235,7 +256,7 @@ export const LoginPage: React.FC = () => {
                 Don't have an account?{" "}
                 <Link
                   to="/register"
-                  className="font-medium text-primary-600 hover:text-primary-500"
+                  className="font-medium text-primary-600 hover:text-primary-500 interactive-link"
                 >
                   Sign up
                 </Link>

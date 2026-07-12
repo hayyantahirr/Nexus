@@ -7,6 +7,8 @@ import {
   CircleDollarSign,
   Building2,
   AlertCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../../components/ui/Button";
@@ -21,6 +23,8 @@ export const RegisterPage: React.FC = () => {
   const [role, setRole] = useState<UserRole>("entrepreneur");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -52,10 +56,10 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="w-12 h-12 bg-primary-600 rounded-md flex items-center justify-center">
+          <div className="w-12 h-12 bg-primary-600 rounded-md flex items-center justify-center interactive-button">
             <svg
               width="32"
               height="32"
@@ -81,7 +85,7 @@ export const RegisterPage: React.FC = () => {
             </svg>
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
           Create your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
@@ -89,8 +93,8 @@ export const RegisterPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md w-full">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 rounded-lg">
           {error && (
             <div className="mb-4 bg-error-50 border border-error-500 text-error-700 px-4 py-3 rounded-md flex items-start">
               <AlertCircle size={18} className="mr-2 mt-0.5" />
@@ -103,12 +107,12 @@ export const RegisterPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 I am registering as a
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className={`py-3 px-4 border rounded-md flex items-center justify-center transition-colors ${
+                  className={`py-3 px-4 border rounded-md flex items-center justify-center transition-colors interactive-button ${
                     role === "entrepreneur"
-                      ? "border-primary-500 bg-primary-50 text-primary-700"
+                      ? "border-primary-500 bg-primary-50 text-primary-700 font-medium"
                       : "border-gray-300 text-gray-700 hover:bg-gray-50"
                   }`}
                   onClick={() => setRole("entrepreneur")}
@@ -119,9 +123,9 @@ export const RegisterPage: React.FC = () => {
 
                 <button
                   type="button"
-                  className={`py-3 px-4 border rounded-md flex items-center justify-center transition-colors ${
+                  className={`py-3 px-4 border rounded-md flex items-center justify-center transition-colors interactive-button ${
                     role === "investor"
-                      ? "border-primary-500 bg-primary-50 text-primary-700"
+                      ? "border-primary-500 bg-primary-50 text-primary-700 font-medium"
                       : "border-gray-300 text-gray-700 hover:bg-gray-50"
                   }`}
                   onClick={() => setRole("investor")}
@@ -154,22 +158,46 @@ export const RegisterPage: React.FC = () => {
 
             <Input
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               fullWidth
               startAdornment={<Lock size={18} />}
+              endAdornmentInteractive={true}
+              endAdornment={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 interactive-button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              }
             />
 
             <Input
               label="Confirm password"
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               fullWidth
               startAdornment={<Lock size={18} />}
+              endAdornmentInteractive={true}
+              endAdornment={
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 interactive-button"
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              }
             />
 
             <div className="flex items-center">
@@ -187,21 +215,26 @@ export const RegisterPage: React.FC = () => {
                 I agree to the{" "}
                 <a
                   href="#"
-                  className="font-medium text-primary-600 hover:text-primary-500"
+                  className="font-medium text-primary-600 hover:text-primary-500 interactive-link"
                 >
                   Terms of Service
                 </a>{" "}
                 and{" "}
                 <a
                   href="#"
-                  className="font-medium text-primary-600 hover:text-primary-500"
+                  className="font-medium text-primary-600 hover:text-primary-500 interactive-link"
                 >
                   Privacy Policy
                 </a>
               </label>
             </div>
 
-            <Button type="submit" fullWidth isLoading={isLoading}>
+            <Button
+              type="submit"
+              fullWidth
+              isLoading={isLoading}
+              className="interactive-button"
+            >
               Create account
             </Button>
           </form>
@@ -221,7 +254,7 @@ export const RegisterPage: React.FC = () => {
                 Already have an account?{" "}
                 <Link
                   to="/login"
-                  className="font-medium text-primary-600 hover:text-primary-500"
+                  className="font-medium text-primary-600 hover:text-primary-500 interactive-link"
                 >
                   Sign in
                 </Link>
